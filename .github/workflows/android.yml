@@ -31,6 +31,8 @@ jobs:
           python3 -m pip install --user --upgrade pip
           python3 -m pip install --user buildozer Cython==0.29.34
 
+      - name: Accept Android SDK Licenses
+        run: yes | buildozer android update
       - name: Build APK
         run: |
           set -o pipefail
