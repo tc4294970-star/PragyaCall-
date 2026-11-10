@@ -1,54 +1,54 @@
-name: PragyaCalls APK Build
+name: PragyaCalls Android APK Build
 
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-22.04
+    timeout-minutes: 360
 
     steps:
-      - name: Checkout
+      - name: Checkout project
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
-          sudo apt update
-          sudo apt install -y git zip unzip autoconf libtool \
-            pkg-config zlib1g-dev libncurses5-dev libffi-dev \
-            libssl-dev cmake automake
+          sudo apt-get update
+          sudo apt-get install -y \
+            git zip unzip build-essential \
+            autoconf libtool pkg-config \
+            zlib1g-dev libncurses5-dev libncursesw5-dev \
+            libtinfo6 cmake libffi-dev libssl-dev
 
       - name: Install Buildozer
         run: |
-          python3 -m pip install --user "pip==25.3"
-          python3 -m pip install --user buildozer Cython==0.29.34
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install "Cython==0.29.36" buildozer
 
-      - name: Build APK
+      - name: Build Android APK
         run: |
-          set -o pipefail
-          export PATH="$HOME/.local/bin:$PATH"
-          echo "pip==25.3" > "$GITHUB_WORKSPACE/pip-constraints.txt"
-          export PIP_CONSTRAINT="$GITHUB_WORKSPACE/pip-constraints.txt"
-          buildozer android debug 2>&1 | tee build.log
-
-      - name: Upload Build Logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: PragyaCalls-Build-Logs
-          path: build.log
-          if-no-files-found: ignore
+          buildozer -v android debug
 
       - name: Upload APK
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: PragyaCalls-APK
           path: bin/*.apk
+          if-no-files-found: warn
+          retention-days: 14
