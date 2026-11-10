@@ -1,0 +1,259 @@
+
+==============================
+FILE: main.py
+==============================
+
+from kivy.app import App
+from kivy.metrics import dp, sp
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.textinput import TextInput
+from kivy.uix.popup import Popup
+
+class PragyaCallsApp(App):
+    def build(self):
+        root = BoxLayout(
+            orientation="vertical",
+            padding=dp(20),
+            spacing=dp(15)
+        )
+
+        root.add_widget(Label(
+            text="[b]PRAGYA CALLS[/b]",
+            markup=True,
+            font_size=sp(28),
+            size_hint_y=None,
+            height=dp(65)
+        ))
+
+        root.add_widget(Label(
+            text="Universal Calling",
+            font_size=sp(16),
+            size_hint_y=None,
+            height=dp(30)
+        ))
+
+        self.phone = TextInput(
+            hint_text="Enter mobile number",
+            multiline=False,
+            input_filter="int",
+            font_size=sp(18),
+            size_hint_y=None,
+            height=dp(55)
+        )
+        root.add_widget(self.phone)
+
+        sim = Button(
+            text="PHONE CALL  |  SIM NETWORK",
+            font_size=sp(17),
+            size_hint_y=None,
+            height=dp(60)
+        )
+        sim.bind(on_release=self.sim_call)
+        root.add_widget(sim)
+
+        internet = Button(
+            text="INTERNET VOICE / VIDEO CALL",
+            font_size=sp(17),
+            size_hint_y=None,
+            height=dp(60)
+        )
+        internet.bind(on_release=lambda x: self.info(
+            "Internet Calling",
+            "Internet voice and video calling module is not connected yet."
+        ))
+        root.add_widget(internet)
+
+        offline = Button(
+            text="OFFLINE NEARBY CALLING",
+            font_size=sp(17),
+            size_hint_y=None,
+            height=dp(60)
+        )
+        offline.bind(on_release=lambda x: self.info(
+            "Offline Nearby Calling",
+            "Wi-Fi Direct connection and nearby device discovery will be added next."
+        ))
+        root.add_widget(offline)
+
+        root.add_widget(Label(
+            text="Secure Communication • PragyaCalls",
+            font_size=sp(12)
+        ))
+
+        return root
+
+    def info(self, title, message):
+        Popup(
+            title=title,
+            content=Label(text=message),
+            size_hint=(0.85, 0.35)
+        ).open()
+
+    def sim_call(self, instance):
+        number = self.phone.text.strip()
+
+        if not number:
+            self.info("Phone Call", "Please enter a phone number.")
+            return
+
+        try:
+            from jnius import autoclass
+            Intent = autoclass("android.content.Intent")
+            Uri = autoclass("android.net.Uri")
+            PythonActivity = autoclass("org.kivy.android.PythonActivity")
+
+            intent = Intent(
+                Intent.ACTION_DIAL,
+                Uri.parse("tel:" + number)
+            )
+            PythonActivity.mActivity.startActivity(intent)
+
+        except Exception as error:
+            self.info("SIM Calling", "Android dialer could not be opened.")
+
+if __name__ == "__main__":
+    PragyaCallsApp().run()
+
+
+==============================
+FILE: main_service.py
+==============================
+
+# PragyaCalls Main Service
+import modules.caller_engine, modules.security_engine, modules.media_engine, modules.ads_engine
+print("PragyaCalls Engine Running Successfully!")
+
+
+==============================
+FILE: make_ui.py
+==============================
+
+import os
+print("Generating PragyaCalls UI layout...")
+with open("main.py", "w") as f:
+    f.write('''from kivy.app import App\nfrom kivy.uix.boxlayout import BoxLayout\nfrom kivy.uix.label import Label\n\nclass PragyaCallsApp(App):\n    def build(self):\n        return BoxLayout(orientation='vertical')\n\nif __name__ == '__main__':\n    PragyaCallsApp().run()\n''')
+print("UI layout template generated!")
+
+
+==============================
+FILE: index.html
+==============================
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PragyaCalls</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📞 PragyaCalls</h1>
+        <p class="subtitle">स्मार्ट कॉलिंग एडमिनिस्ट्रेटर</p>
+        
+        <div class="dialer-box">
+            <input type="text" id="phoneInput" placeholder="नंबर दर्ज करें..." />
+            <div class="btn-group">
+                <button class="call-btn" onclick="makeCall()">कॉल करें</button>
+                <button class="clear-btn" onclick="clearInput()">साफ करें</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function makeCall() {
+            let num = document.getElementById('phoneInput').value;
+            if(num) {
+                window.location.href = 'tel:' + num;
+            } else {
+                alert('कृपया पहले नंबर डालें!');
+            }
+        }
+        function clearInput() {
+            document.getElementById('phoneInput').value = '';
+        }
+    </script>
+</body>
+</html>
+
+
+==============================
+FILE: style.css
+==============================
+
+body {
+    background-color: #0f172a;
+    color: #ffffff;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+.container {
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    background: #1e293b;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+h1 { margin-bottom: 5px; color: #38bdf8; }
+.subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
+input {
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 8px;
+    border: 1px solid #475569;
+    background: #0f172a;
+    color: white;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    text-align: center;
+}
+.btn-group { display: flex; gap: 10px; }
+button {
+    flex: 1;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.call-btn { background: #22c55e; color: white; }
+.clear-btn { background: #ef4444; color: white; }
+
+
+==============================
+FILE: modules/ads_engine.py
+==============================
+
+# Native Hidden UI Ads Integration
+
+
+==============================
+FILE: modules/caller_engine.py
+==============================
+
+# Truecaller ID, Live Location, Social Links & AI Enhancer Engine
+
+
+==============================
+FILE: modules/media_engine.py
+==============================
+
+# Voice Changer & In-App Video Calling Engine
+
+
+==============================
+FILE: modules/security_engine.py
+==============================
+
+# Bank Logo & Fraud Detection Engine (FRAUD ❌)

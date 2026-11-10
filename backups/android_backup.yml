@@ -1,0 +1,52 @@
+name: PragyaCalls APK Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git zip unzip autoconf libtool \
+            pkg-config zlib1g-dev libncurses5-dev libffi-dev \
+            libssl-dev cmake automake
+
+      - name: Install Buildozer
+        run: |
+          python3 -m pip install --user --upgrade pip
+          python3 -m pip install --user buildozer Cython==0.29.34
+
+      - name: Build APK
+        run: |
+          set -o pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          buildozer android debug 2>&1 | tee build.log
+
+      - name: Upload Build Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: PragyaCalls-Build-Logs
+          path: build.log
+          if-no-files-found: ignore
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: PragyaCalls-APK
+          path: bin/*.apk
