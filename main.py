@@ -1,3 +1,40 @@
+
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+
+class PragyaCallsApp(App):
+    def build(self):
+        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+        
+        # Title Label
+        self.title_label = Label(
+            text='PragyaCalls - Universal Calling', 
+            font_size='20sp', 
+            size_hint=(1, 0.2)
+        )
+        layout.add_widget(self.title_label)
+        
+        # Status / Info
+        self.status_label = Label(
+            text='Ready for Calls, AI Enhancement & Native Ads', 
+            font_size='14sp', 
+            size_hint=(1, 0.6)
+        )
+        layout.add_widget(self.status_label)
+        
+        # Action Button
+        self.btn = Button(
+            text='Open Keypad / Dialer', 
+            size_hint=(1, 0.2)
+        )
+        layout.add_widget(self.btn)
+        
+        return layout
+
+if __name__ == '__main__':
+    PragyaCallsApp().run()
 from kivy.app import App
 from kivy.metrics import dp, sp
 from kivy.uix.boxlayout import BoxLayout
